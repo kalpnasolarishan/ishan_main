@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalpna Docs</title>
+<style>
+:root{--bg:#f4f6fa;--fg:#14213d;--card:#fff;--bd:#d5dbe6;--ac:#0b2a63;--mut:#667085}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:var(--ac);color:#fff;padding:12px 16px}header b{font-size:18px}header span{opacity:.8;font-size:13px;margin-left:10px}
+main{display:grid;grid-template-columns:minmax(320px,430px) 1fr;gap:14px;padding:14px;max-width:1500px;margin:auto}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}h2{font-size:16px;margin:0 0 8px}
+label{display:block;font-size:12px;color:var(--mut);margin:8px 0 2px}input,select,textarea{width:100%;padding:9px;border:1px solid var(--bd);border-radius:8px;font:inherit;background:#fff;color:var(--fg)}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+canvas#pad{width:100%;height:220px;background:#fff;border:2px solid var(--fg);border-radius:10px;touch-action:none;display:block}
+button,.btn{padding:9px 14px;border:0;border-radius:8px;background:var(--ac);color:#fff;font:inherit;font-weight:600;cursor:pointer;margin:8px 6px 0 0}button.s{background:#fff;color:var(--ac);border:1px solid var(--ac)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}.tab{background:#fff;color:var(--ac);border:1px solid var(--ac);margin:0}.tab.on{background:var(--ac);color:#fff}
+#status{margin:8px 0;font-weight:600}#status.need{color:#9a5b00}#status.err{color:#b00020}
+iframe#view{width:100%;height:78vh;border:1px solid var(--bd);border-radius:8px;background:#fff;display:none}
+.mut{color:var(--mut);font-size:13px}.tg{display:flex;gap:6px;align-items:center;color:var(--fg);font-size:14px;margin:3px 0}.tg input,.chk input{width:auto}
+details{margin:6px 0}summary{cursor:pointer;font-weight:600}.row{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}.row label{display:flex;gap:5px;align-items:center;color:var(--fg);font-size:14px;margin:0}.row input{width:auto}
+</style></head><body>
+<header><b>Kalpna Docs</b><span>Everything stays on this device. Nothing is saved or sent.</span></header>
+<main>
+<div>
+  <div class="card" id="form"><h2>Customer</h2>
+    <div class="g"><div><label>Customer name</label><input id="name" autocomplete="off"></div><div><label>Mobile</label><input id="mobile" inputmode="numeric" maxlength="10"></div></div>
+    <label>Address</label><input id="address" autocomplete="off">
+    <div class="g"><div><label>K number (Discom)</label><input id="kno"></div><div><label>System size (kW)</label><input id="kw" inputmode="decimal"></div>
+    <div><label>Total project cost (incl. GST)</label><input id="total" inputmode="decimal"></div><div><label>Amount received now</label><input id="received" inputmode="decimal"></div>
+    <div><label>Payment mode</label><select id="mode"><option>Cash</option><option>Cheque</option><option>NEFT</option></select></div><div><label>Sales partner</label><select id="partner"></select></div>
+    <div><label>Payment schedule (blank = Loan)</label><input id="schedule"></div><div><label>Date</label><input id="date" type="date"></div></div>
+    <label>Reference no. (blank = made from the date and time)</label><input id="ref">
+    <div class="mut" style="margin-top:6px">Use English letters. Hindi text cannot be printed yet.</div>
+  </div>
+  <div class="card"><h2>Customer signature</h2>
+    <div class="row chk"><label><input type="radio" name="sm" value="pad" checked> Sign on the screen</label><label><input type="radio" name="sm" value="photo"> Use a photo of the signature</label></div>
+    <div id="padbox"><canvas id="pad" style="margin-top:8px"></canvas><button class="s" id="undo">Undo</button><button class="s" id="clear">Clear</button></div>
+    <div id="photobox" style="display:none"><div class="mut" style="margin-top:6px">Sign with dark ink on plain white paper and take a clear photo in good light.</div>
+      <input type="file" id="photof" accept="image/*"><label>Background removal strength (move it if marks remain or the ink looks thin)</label><input type="range" id="strength" min="0.6" max="0.95" step="0.01" value="0.85">
+      <div class="mut">Preview with the background removed:</div><canvas id="photoprev" style="display:none;max-width:100%;height:auto;max-height:160px;background:repeating-conic-gradient(#ccc 0 25%,#fff 0 50%) 0 0/14px 14px;border-radius:8px;margin-top:4px"></canvas>
+      <div class="mut" id="photomsg"></div></div>
+    <h2 style="margin-top:14px">E-stamp photo (for the agreement)</h2><input type="file" id="estamp" accept="image/*">
+  </div>
+  <div class="card"><h2>Download several documents</h2><div class="row chk">
+    <label><input type="checkbox" class="jk" value="agreement" checked> Agreement</label><label><input type="checkbox" class="jk" value="receipt" checked> Receipt</label>
+    <label><input type="checkbox" class="jk" value="invoice" checked> Invoice</label><label><input type="checkbox" class="jk" value="quotation" checked> Quotation</label></div>
+    <button id="dlsep">Download ticked, one by one</button><button id="dlzip">Download ticked as one ZIP</button>
+    <div class="mut">Each document stays a separate PDF. Your browser may ask permission to download several files.</div><div id="dlmsg" class="mut" style="font-weight:600"></div>
+    <button class="s" id="join">Or join ticked into one PDF to print</button></div>
+  <details class="card"><summary>Setup (do once)</summary>
+    <div class="mut">Your seal and signature are chosen here on your own device. They are never put on the website.</div>
+    <label>Seal image with "For ..." text (PNG)</label><input type="file" id="sealf" accept="image/png">
+    <label>Your signature only (PNG)</label><input type="file" id="vsignf" accept="image/png">
+    <label>Business address lines (one per line)</label><textarea id="addr" rows="4"></textarea>
+    <label>Bank details lines (one per line, printed on invoice and quotation)</label><textarea id="bank" rows="7"></textarea>
+    <label>Sales partners, one per line: Name in list | Name on documents | Phone</label><textarea id="partners" rows="3"></textarea>
+    <div id="toggles" style="margin-top:8px"></div>
+    <label class="tg"><input type="checkbox" id="remember"> Remember this setup on this device</label>
+    <button id="save">Save setup</button> <span class="mut" id="setupmsg"></span></details>
+</div>
+<div>
+  <div class="card"><div class="tabs"><button class="tab on" data-k="agreement">Agreement</button><button class="tab" data-k="receipt">Receipt</button><button class="tab" data-k="invoice">Invoice</button><button class="tab" data-k="quotation">Quotation</button></div>
+    <div id="status"></div>
+    <div><button class="dl" data-k="agreement">Download Agreement</button><button class="dl" data-k="receipt">Download Receipt</button><button class="dl" data-k="invoice">Download Invoice</button><button class="dl" data-k="quotation">Download Quotation</button>
+    <a id="open" class="btn" target="_blank" style="display:none;text-decoration:none">Open this PDF in a new tab</a></div>
+    <iframe id="view" title="Preview"></iframe></div>
+</div>
+</main>
+<script src="pdf-lib.min.js"></script><script src="rupee.js"></script><script src="app.js"></script>
+</body></html>
